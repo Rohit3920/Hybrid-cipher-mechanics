@@ -1,5 +1,11 @@
 def ceaser_encrypt(plaintext, key):
-    k1 = key
+    k1 = 0
+    if key == 0 :
+        k1 = key+1
+    elif k1 == 1 :
+        k1 = k1 -1
+    else :
+        k1 = key
     print("Ceaser cipher")
     ciphertext = ""
     for char in plaintext:

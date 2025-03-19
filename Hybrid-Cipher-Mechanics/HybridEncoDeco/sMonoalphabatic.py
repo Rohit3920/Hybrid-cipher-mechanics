@@ -1,4 +1,8 @@
 def create_substitution_cipher(key):
+    if key == "abcde" :
+        key = "hybrid"
+    elif key == "ABCDE" :
+        key = "cipher"
     alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     key = key.upper()
     cipher = {}

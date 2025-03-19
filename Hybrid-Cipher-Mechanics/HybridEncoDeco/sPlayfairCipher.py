@@ -1,51 +1,16 @@
-def playfair_encrypt(plaintext, key):
-    print("Playfair cipher")
-    plaintext = plaintext.upper().replace("J", "I")
-    plaintext_processed = ""
-    for char in plaintext:
-        if char.isalpha():
-            plaintext_processed += char
-        elif char == ' ':
-            plaintext_processed += ' '  # Keep spaces
-
-    if len(plaintext_processed.replace(" ", "")) % 2 != 0:
-        plaintext_processed = plaintext_processed.replace(" ", "")
-        plaintext_processed += "X"
-
-    ciphertext = ""
-    i = 0
-    while i < len(plaintext_processed):
-        if plaintext_processed[i] == ' ':
-            ciphertext += ' '
-            i += 1
-        else:
-            if i + 1 < len(plaintext_processed) and plaintext_processed[i + 1] != ' ':
-                pair = plaintext_processed[i:i + 2]
-                ciphertext += pEncrypt(pair, key)
-                i += 2
-            else:
-                pair = plaintext_processed[i] + 'X'  # Pad with X if last char and not space
-                ciphertext += pEncrypt(pair, key)
-                i += 1
+def playfair_encrypt(plaintext, k):
+    print("Play fair cipher")
+    x = plaintext.split(" ")
+    for i in range(len(x)) :
+        x[i] = pEncrypt(x[i], k)
+    ciphertext = " ".join(x)
     return ciphertext
 
-def playfair_decrypt(ciphertext, key):
-    print("Playfair decryption")
-    plaintext = ""
-    i = 0
-    while i < len(ciphertext):
-        if ciphertext[i] == ' ':
-            plaintext += ' '
-            i += 1
-        else:
-            pair = ciphertext[i:i + 2]
-            plaintext += pDecrypt(pair, key)
-            i += 2
-
-    # Remove trailing 'X' if added during encryption
-    if len(plaintext.replace(" ", "")) % 2 != 0 and plaintext[-1] == 'X':
-        plaintext = plaintext[:-1]
-
+def playfair_decrypt(ciphertext, k):
+    x = ciphertext.split(" ")
+    for i in range(len(x)) :
+        x[i] = pDecrypt(x[i], k)
+    plaintext = " ".join(x)
     return plaintext
 
 def create_playfair_matrix(key):
@@ -72,32 +37,52 @@ def find_char_position(matrix, char):
             return row_index, row.index(char)
     return None
 
-def pEncrypt(pair, key):
+def pEncrypt(plaintext, key):
     matrix = create_playfair_matrix(key)
-    char1 = pair[0]
-    char2 = pair[1]
+    plaintext = plaintext.upper().replace("J", "I")
+    plaintext = "".join(filter(str.isalpha, plaintext))  # Remove non-alpha chars
+    if len(plaintext) % 2 != 0:
+        plaintext += "X"  # Pad with X if odd length
 
-    row1, col1 = find_char_position(matrix, char1)
-    row2, col2 = find_char_position(matrix, char2)
+    ciphertext = ""
+    for i in range(0, len(plaintext), 2):
+        char1 = plaintext[i]
+        char2 = plaintext[i + 1]
 
-    if row1 == row2:  # Same row
-        return matrix[row1][(col1 + 1) % 5] + matrix[row2][(col2 + 1) % 5]
-    elif col1 == col2:  # Same column
-        return matrix[(row1 + 1) % 5][col1] + matrix[(row2 + 1) % 5][col2]
-    else:  # Rectangle
-        return matrix[row1][col2] + matrix[row2][col1]
+        row1, col1 = find_char_position(matrix, char1)
+        row2, col2 = find_char_position(matrix, char2)
 
-def pDecrypt(pair, key):
+        if row1 == row2:  # Same row
+            ciphertext += matrix[row1][(col1 + 1) % 5]
+            ciphertext += matrix[row2][(col2 + 1) % 5]
+        elif col1 == col2:  # Same column
+            ciphertext += matrix[(row1 + 1) % 5][col1]
+            ciphertext += matrix[(row2 + 1) % 5][col2]
+        else:  # Rectangle
+            ciphertext += matrix[row1][col2]
+            ciphertext += matrix[row2][col1]
+
+    return ciphertext
+
+def pDecrypt(ciphertext, key):
     matrix = create_playfair_matrix(key)
-    char1 = pair[0]
-    char2 = pair[1]
 
-    row1, col1 = find_char_position(matrix, char1)
-    row2, col2 = find_char_position(matrix, char2)
+    plaintext = ""
+    for i in range(0, len(ciphertext), 2):
+        char1 = ciphertext[i]
+        char2 = ciphertext[i + 1]
 
-    if row1 == row2:  # Same row
-        return matrix[row1][(col1 - 1) % 5] + matrix[row2][(col2 - 1) % 5]
-    elif col1 == col2:  # Same column
-        return matrix[(row1 - 1) % 5][col1] + matrix[(row2 - 1) % 5][col2]
-    else:  # Rectangle
-        return matrix[row1][col2] + matrix[row2][col1]
+        row1, col1 = find_char_position(matrix, char1)
+        row2, col2 = find_char_position(matrix, char2)
+
+        if row1 == row2:  # Same row
+            plaintext += matrix[row1][(col1 - 1) % 5]
+            plaintext += matrix[row2][(col2 - 1) % 5]
+        elif col1 == col2:  # Same column
+            plaintext += matrix[(row1 - 1) % 5][col1]
+            plaintext += matrix[(row2 - 1) % 5][col2]
+        else:  # Rectangle
+            plaintext += matrix[row1][col2]
+            plaintext += matrix[row2][col1]
+
+    return plaintext.lower()
