@@ -18,7 +18,6 @@ def decryption(ch, ciphertext, dKey) :
     dt = monoalphabetic_decrypt(ciphertext, dKey) if ch ==1 else ceaser_decrypt(ciphertext, dKey) if ch == 2 else playfair_decrypt(ciphertext, dKey) if ch == 3 else  rail_fence_decrypt(ciphertext, dKey) if ch == 4 else polyalphabetic_decrypt(ciphertext, dKey) if ch == 5 else ceaser_decrypt(ciphertext, numeric_key)
     return dt
 
-
 #Key managemenet
 numeric_key, alphabetic_key = generate_keys()
 key1 = int(numeric_key)
