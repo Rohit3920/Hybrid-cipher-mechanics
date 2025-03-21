@@ -1,17 +1,9 @@
-import time
 import string
 
-def generate_keys():
-    today = time.localtime()
-    mint = today.tm_min
-    hr = today.tm_hour
-    wday = today.tm_wday
-    mday = today.tm_mday
-    month = today.tm_mon
-    yr = today.tm_year
+def generate_keys(time):
+    yr, month, mday, hr, mint, sec, wday, yday = time
 
     t_val = mint *(hr  + wday + mday + month + yr)
-    print(t_val)
     mod_val = t_val % 100
     remain_val = int(t_val / 100)
     numeric_key = (mod_val + remain_val) % 100

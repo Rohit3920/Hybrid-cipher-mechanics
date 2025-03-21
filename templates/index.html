@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-box {
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        #message-input {
+            width: 80%;
+            padding: 10px;
+        }
+
+        #send-btn {
+            padding: 10px;
+        }
+
+        .message {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Chat Application</h1>
+    <div id="chat-box"></div>
+    <input id="message-input" type="text" placeholder="Type your message here..." />
+    <button id="send-btn">Send</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Fetch chat history and display it
+        fetch('/messages')
+            .then(response => response.json())
+            .then(data => {
+                const chatBox = document.getElementById('chat-box');
+                data.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('message');
+                    messageDiv.innerText = `${msg.username}: ${msg.message}`;
+                    chatBox.appendChild(messageDiv);
+                });
+            });
+
+        // Send a message to the server
+        document.getElementById('send-btn').onclick = function () {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            if (message) {
+                socket.send(message);
+                messageInput.value = ''; // Clear input
+            }
+        };
+
+        // Conceptual example (requires OAuth 2.0 library and setup)
+        function getOS() {
+            oauthLibrary.getEmail().then((email) => {
+                        var profile = googleUser.getBasicProfile();
+                        console.log("ID: " + profile.getId()); // Do not send to your backend! Use an ID token instead.
+                        console.log("Name: " + profile.getName());
+                        console.log("Email: " + profile.getEmail());
+                    })
+                }
+
+                    console.log(getOS());
+
+                    // Listen for messages from the server
+                    socket.on('message', function (msg) {
+                        const chatBox = document.getElementById('chat-box');
+                        const messageDiv = document.createElement('div');
+                        messageDiv.classList.add('message');
+                        messageDiv.innerText = `${getOS()} : ${msg}`;
+                        chatBox.appendChild(messageDiv);
+                        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+                    });
+    </script>
+</body>
+
+</html>

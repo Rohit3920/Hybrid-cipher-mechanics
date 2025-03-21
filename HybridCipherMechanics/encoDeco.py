@@ -1,4 +1,6 @@
 import time
+from pymongo import MongoClient
+from flask import jsonify
 
 from KeyGen.edKay import generate_keys
 from HybridEncoDeco.sCeaserCipher import *
@@ -7,32 +9,56 @@ from HybridEncoDeco.sPlayfairCipher import *
 from HybridEncoDeco.sPolyalphabatic import *
 from HybridEncoDeco.tRailFenceTransposition import *
 
+# Connect to MongoDB (Assuming MongoDB is running locally)
+client = MongoClient('mongodb://localhost:27017/')
+db = client['chat-app']
+messages_collection = db['messages']
+
+def mTime(txt):
+    messages = messages_collection.find().sort('timestamp', 1)
+    for msg in messages :
+        if msg['message'] == txt :
+            return msg['time']
+
 # Encryption
-def encryption(ch, plaintext, eKey) :
-    et = monoalphabetic_encrypt(plaintext, eKey) if ch ==1 else ceaser_encrypt(plaintext, eKey) if ch == 2 else playfair_encrypt(plaintext, eKey) if ch == 3 else  rail_fence_encrypt(plaintext, eKey) if ch == 4 else  polyalphabetic_encrypt(plaintext, eKey) if ch == 5 else ceaser_encrypt(plaintext, eKey)
+def encryption(plaintext) :
+    plaintext = str(plaintext)
+    ch = chooseED(setTime())
+    eKey, numeric_key = chooseKey(ch, setTime())
+    et = monoalphabetic_encrypt(plaintext, eKey) if ch ==1 else ceaser_encrypt(plaintext, eKey) if ch == 2 else playfair_encrypt(plaintext, eKey) if ch == 3 else  rail_fence_encrypt(plaintext, eKey) if ch == 4 else  polyalphabetic_encrypt(plaintext, eKey) if ch == 5 else ceaser_encrypt(plaintext, numeric_key)
+    print("Encryption  > " + et)
     return et
 
 
 # decryption
-def decryption(ch, ciphertext, dKey) :
+def decryption(ciphertext) :
+    msgTime = mTime(ciphertext)
+    # ciphertext = str(ciphertext)
+    ch = chooseED(msgTime)
+    dKey, numeric_key = chooseKey(ch, msgTime)
     dt = monoalphabetic_decrypt(ciphertext, dKey) if ch ==1 else ceaser_decrypt(ciphertext, dKey) if ch == 2 else playfair_decrypt(ciphertext, dKey) if ch == 3 else  rail_fence_decrypt(ciphertext, dKey) if ch == 4 else polyalphabetic_decrypt(ciphertext, dKey) if ch == 5 else ceaser_decrypt(ciphertext, numeric_key)
+    print("Decryption > " + dt)
     return dt
 
-#Key managemenet
-numeric_key, alphabetic_key = generate_keys()
-key1 = int(numeric_key)
-key2 = str(alphabetic_key)
-print(key1)
-print(key2)
+#set time for send massege
 
-def chooseED():
+
+def setTime():
     today = time.localtime()
-    mint = today.tm_min
-    hr = today.tm_hour
-    wday = today.tm_wday
-    mday = today.tm_mday
-    month = today.tm_mon
     yr = today.tm_year
+    month = today.tm_mon
+    mday = today.tm_mday
+    hr = today.tm_hour
+    mint = today.tm_min
+    sec = today.tm_sec
+    wday = today.tm_wday
+    yday = today.tm_yday
+    t = [yr, month, mday, hr, mint, sec, wday, yday]
+    return t
+setTime()
+
+def chooseED(t):
+    yr, month, mday, hr, mint, sec, wday, yday = t
 
     t_val = mint *(hr  + wday + mday + month + yr)
     mod_val = t_val % 100
@@ -41,18 +67,21 @@ def chooseED():
     return ch
 
 #choose key for perticular cipher model
-def chooseKey(ch) :
+def chooseKey(ch, msgTime) :
+    numeric_key, alphabetic_key = generate_keys(msgTime)
+    key1 = int(numeric_key)
+    key2 = str(alphabetic_key)
+    # print(key1)
+    # print(key2)
+
     if ch % 2 == 0 :
         key = key1
     else :
         key = key2
-    return key
-
+    return key, numeric_key
 
 # try example for any
 pText = "hybrid cipher mechanics"
-encrypted_text = encryption(chooseED(), pText, chooseKey(chooseED()))
-print(f"Encrypted: {encrypted_text}")
+# encrypted_text = encryption(pText)
+# print(decryption("TGKKKW"))
 
-decrypted_text = decryption(chooseED(), encrypted_text, chooseKey(chooseED()))
-print(f"decrypted: {decrypted_text}")
