@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Chat App</title>
+    <title>HCM Chat App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -29,11 +29,27 @@
         .message {
             margin: 10px 0;
         }
+
+        #dipUser {
+            text-transform: capitalize;
+        }
+
+        .hideContent {
+            display: none;
+            visibility: hidden;
+        }
     </style>
 </head>
 
 <body>
     <h1>Chat Application</h1>
+
+    <div id="userBtn" class="hideContent">
+        <button><a href="signup">Sign Up</a></button>
+        <button><a href="login">Log In</a></button>
+    </div>
+    <button id="logout" onclick="logout()"> <span id="dipUser"></span> ( <small>Logout</small>)</button>
+
     <div id="chat-box"></div>
     <input id="message-input" type="text" placeholder="Type your message here..." />
     <button id="send-btn">Send</button>
@@ -42,50 +58,68 @@
     <script>
         const socket = io.connect('http://' + document.domain + ':' + location.port);
 
+        const dipUser = document.getElementById("dipUser");
+        const userString = localStorage.getItem('user');
+        const userObject = JSON.parse(userString);
+
+        // Function to display messages
+        function displayMessage(username, message) {
+            const chatBox = document.getElementById('chat-box');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.innerText = `${username}: ${message}`;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to bottom
+        }
+
         // Fetch chat history and display it
         fetch('/messages')
             .then(response => response.json())
             .then(data => {
-                const chatBox = document.getElementById('chat-box');
                 data.forEach(msg => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.classList.add('message');
-                    messageDiv.innerText = `${msg.username}: ${msg.message}`;
-                    chatBox.appendChild(messageDiv);
+                    displayMessage(msg.username, msg.message);
                 });
             });
 
-        // Send a message to the server
+        // Send a message to the server, including the username
         document.getElementById('send-btn').onclick = function () {
             const messageInput = document.getElementById('message-input');
             const message = messageInput.value;
-            if (message) {
-                socket.send(message);
-                messageInput.value = ''; // Clear input
+
+            if (message && userObject && userObject.username) {
+                const messageData = {
+                    username: userObject.username,
+                    message: message
+                };
+                socket.emit('chat_message', messageData);
+                displayMessage(userObject.username, message); // Display immediately
+                messageInput.value = '';
+                messageInput.focus();
             }
         };
 
-        // Conceptual example (requires OAuth 2.0 library and setup)
-        function getOS() {
-            oauthLibrary.getEmail().then((email) => {
-                        var profile = googleUser.getBasicProfile();
-                        console.log("ID: " + profile.getId()); // Do not send to your backend! Use an ID token instead.
-                        console.log("Name: " + profile.getName());
-                        console.log("Email: " + profile.getEmail());
-                    })
-                }
+        // Listen for chat messages from the server
+        socket.on('chat_message', function (data) {
+            displayMessage(data.username, data.message);
+        });
 
-                    console.log(getOS());
+        function disUser() {
+            if (userObject && userObject.username) {
+                dipUser.innerText = userObject.username;
+                document.getElementById("userBtn").classList.add("hideContent");
+            } else {
+                document.getElementById("userBtn").classList.remove("hideContent");
+                document.getElementById('logout').style.display = 'none'; // hide the logout button if no user.
+            }
+        }
+        disUser();
 
-                    // Listen for messages from the server
-                    socket.on('message', function (msg) {
-                        const chatBox = document.getElementById('chat-box');
-                        const messageDiv = document.createElement('div');
-                        messageDiv.classList.add('message');
-                        messageDiv.innerText = `${getOS()} : ${msg}`;
-                        chatBox.appendChild(messageDiv);
-                        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
-                    });
+        // logout button click to call this function
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "/login";
+        }
+
     </script>
 </body>
 
