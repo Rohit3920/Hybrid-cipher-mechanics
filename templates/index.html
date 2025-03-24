@@ -92,7 +92,7 @@
                     message: message
                 };
                 socket.emit('chat_message', messageData);
-                displayMessage(userObject.username, message); // Display immediately
+                // displayMessage(userObject.username, message); // Display immediately
                 messageInput.value = '';
                 messageInput.focus();
             }

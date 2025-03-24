@@ -1,19 +1,13 @@
 import sys
-# import asyncio
-# # import websockets
-# import json
-
-sys.path.insert(1, 'C://Users//HP//Desktop//mini project//Domain specific mini Project//HybridCipherMechanics')
-import HybridCipherMechanics.encoDeco as hcm
-
 from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO, emit
 from pymongo import MongoClient
 from datetime import datetime
 import time
 import platform
-# import hashlib
-# import secrets
+
+sys.path.insert(1, 'C://Users//HP//Desktop//mini project//Domain specific mini Project//HybridCipherMechanics')
+import HybridCipherMechanics.encoDeco as hcm
 
 system_name = platform.system()
 print(system_name)
@@ -41,20 +35,21 @@ db = client['HCM_chatApp']
 messages_collection = db['messages']
 m_collection = db['m']
 users_collection = db['users']
-# active_users_collection = db['active_User']
 
 userInHCM = 'HCM_user'
+
 @app.route('/login', methods=['POST'])
-def login() :
+def login():
     data = request.get_json()
     username = data.get('username')
-    password = data.get('passsword')
+    password = data.get('password')  # Corrected typo
     global userInHCM
     userInHCM = username
     users_collection.insert_one({
-        "username" : username,
-        "password" : password
+        "username": username,
+        "password": password
     })
+    return jsonify({'status': 'success', 'message': 'Logged in'}), 200
 
 @app.route('/')
 def index():
@@ -67,23 +62,21 @@ def handle_chat_message(data):
 
     if username and message:
         mes = {
-        'username': username,  # In a real app, you would fetch the username
-        'message': hcm.encryption(message),
-        "time" : setTime(),
-        'timestamp': datetime.now()
+            'username': username,
+            'message': hcm.encryption(message),
+            "time": setTime(),
+            'timestamp': datetime.now()
         }
 
         messages_collection.insert_one(mes)
-        # Store the message in MongoDB
         m_collection.insert_one({
             'username': username,
             'message': message,
             "time": setTime(),
             'timestamp': datetime.now()
         })
-
         # Broadcast the message to all clients
-        socketio.emit('chat_message', {'username': username, 'message': message}, broadcast=True)
+        emit('chat_message', {'username': username, 'message': message}, broadcast=True)
 
 @app.route('/messages', methods=['GET'])
 def get_messages():
@@ -92,30 +85,12 @@ def get_messages():
     chat_history = []
     for msg in messages:
         chat_history.append({
-            'username': msg['username'],  # Access using string keys consistently
+            'username': msg['username'],
             'message': msg['message'],
             'time': msg['time'],
             'timestamp': msg['timestamp']
         })
     return jsonify(chat_history)
-# Handle incoming chat messages
-# @socketio.on('message')
-# def handle_message(msg):
-#     message = {
-#         'username': userInHCM,  # In a real app, you would fetch the username
-#         'message': hcm.encryption(msg),
-#         "time" : setTime(),
-#         'timestamp': datetime.now()
-#     }
-
-#     messages_collection.insert_one(message)
-#     m_collection.insert_one({
-#         'username': userInHCM,  #In a real app, you would fetch the username
-#         'message':msg,
-#         "time" : setTime(),
-#         'timestamp': datetime.now()
-#     })
-#     send(msg, broadcast=True)
 
 @app.route('/signup')
 def signup_page():
@@ -129,11 +104,12 @@ def login_page():
 def signup():
     data = request.get_json()
     username = data.get('username')
-    password = data.get('passsword')
+    password = data.get('password')  # Corrected typo
     users_collection.insert_one({
-        "username" : username,
-        "password" : password
+        "username": username,
+        "password": password
     })
+    return jsonify({'status': 'success', 'message': 'Signed up'}), 200
 
 @app.route('/get_data', methods=['POST'])
 def get_data():
@@ -141,10 +117,9 @@ def get_data():
     if data and 'user' in data:
         received_data = data['data']
         print(f"Received data: {received_data}")
-        # Process the received data (e.g., store in database)
         return jsonify({'status': 'success', 'message': 'Data received'}), 200
     else:
         return jsonify({'status': 'error', 'message': 'No data received'}), 400
 
-if __name__ == '__main__' :
+if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5001, debug=True)
