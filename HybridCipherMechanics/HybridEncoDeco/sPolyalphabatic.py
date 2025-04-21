@@ -1,5 +1,6 @@
 def polyalphabetic_encrypt(plaintext, key):
     print("polyalphabetic cipher")
+
     plaintext = plaintext.upper()
     key = key.upper()
     ciphertext = ""

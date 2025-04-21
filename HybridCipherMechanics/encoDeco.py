@@ -27,15 +27,16 @@ def encryption(plaintext) :
     eKey, numeric_key = chooseKey(ch, setTime())
     et = monoalphabetic_encrypt(plaintext, eKey) if ch ==1 else ceaser_encrypt(plaintext, eKey) if ch == 2 else playfair_encrypt(plaintext, eKey) if ch == 3 else  rail_fence_encrypt(plaintext, eKey) if ch == 4 else  polyalphabetic_encrypt(plaintext, eKey) if ch == 5 else ceaser_encrypt(plaintext, numeric_key)
     print("Encryption  > " + et)
+    decryption(et)
     return et
 
 
 # decryption
 def decryption(ciphertext) :
-    msgTime = mTime(ciphertext)
+    # msgTime = mTime(ciphertext)
     # ciphertext = str(ciphertext)
-    ch = chooseED(msgTime)
-    dKey, numeric_key = chooseKey(ch, msgTime)
+    ch = chooseED(setTime())
+    dKey, numeric_key = chooseKey(ch, setTime())
     dt = monoalphabetic_decrypt(ciphertext, dKey) if ch ==1 else ceaser_decrypt(ciphertext, dKey) if ch == 2 else playfair_decrypt(ciphertext, dKey) if ch == 3 else  rail_fence_decrypt(ciphertext, dKey) if ch == 4 else polyalphabetic_decrypt(ciphertext, dKey) if ch == 5 else ceaser_decrypt(ciphertext, numeric_key)
     print("Decryption > " + dt)
     return dt
@@ -60,7 +61,10 @@ setTime()
 def chooseED(t):
     yr, month, mday, hr, mint, sec, wday, yday = t
 
-    t_val = mint *(hr  + wday + mday + month + yr)
+    if mint == 0:
+        mint = mint + 1
+
+    t_val = (mint+60) + (hr  + wday + mday + month + yr + yday)
     mod_val = t_val % 100
     remain_val = int(t_val / 100)
     ch = (mod_val + remain_val) % 6
@@ -71,8 +75,8 @@ def chooseKey(ch, msgTime) :
     numeric_key, alphabetic_key = generate_keys(msgTime)
     key1 = int(numeric_key)
     key2 = str(alphabetic_key)
-    # print(key1)
-    # print(key2)
+    print(key1)
+    print(key2)
 
     if ch % 2 == 0 :
         key = key1
@@ -82,6 +86,4 @@ def chooseKey(ch, msgTime) :
 
 # try example for any
 pText = "hybrid cipher mechanics"
-# encrypted_text = encryption(pText)
-# print(decryption("TGKKKW"))
 

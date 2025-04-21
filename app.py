@@ -4,13 +4,10 @@ from flask_socketio import SocketIO, emit
 from pymongo import MongoClient
 from datetime import datetime
 import time
-import platform
 
 sys.path.insert(1, 'C://Users//HP//Desktop//mini project//Domain specific mini Project//HybridCipherMechanics')
 import HybridCipherMechanics.encoDeco as hcm
 
-system_name = platform.system()
-print(system_name)
 
 def setTime():
     today = time.localtime()
@@ -72,6 +69,7 @@ def handle_chat_message(data):
         m_collection.insert_one({
             'username': username,
             'message': message,
+            'dMessage' : hcm.decryption(),
             "time": setTime(),
             'timestamp': datetime.now()
         })
