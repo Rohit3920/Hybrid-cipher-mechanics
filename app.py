@@ -69,7 +69,7 @@ def handle_chat_message(data):
         m_collection.insert_one({
             'username': username,
             'message': message,
-            'dMessage' : hcm.decryption(),
+            # 'dMessage' : hcm.decryption(),
             "time": setTime(),
             'timestamp': datetime.now()
         })

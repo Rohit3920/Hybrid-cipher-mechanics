@@ -2,12 +2,12 @@ import time
 from pymongo import MongoClient
 from flask import jsonify
 
-from KeyGen.edKay import generate_keys
-from HybridEncoDeco.sCeaserCipher import *
-from HybridEncoDeco.sMonoalphabatic import *
-from HybridEncoDeco.sPlayfairCipher import *
-from HybridEncoDeco.sPolyalphabatic import *
-from HybridEncoDeco.tRailFenceTransposition import *
+from .KeyGen.edKey import generate_keys
+from .HybridEncoDeco.sCeaserCipher import *
+from .HybridEncoDeco.sMonoalphabatic import *
+from .HybridEncoDeco.sPlayfairCipher import *
+from .HybridEncoDeco.sPolyalphabatic import *
+from .HybridEncoDeco.tRailFenceTransposition import *
 
 # Connect to MongoDB (Assuming MongoDB is running locally)
 client = MongoClient('mongodb://localhost:27017/')
