@@ -15,6 +15,11 @@ def ceaser_encrypt(plaintext, key):
         else:
             shifted_char = char
         ciphertext += shifted_char
+
+    if plaintext == ciphertext:
+        k1 = key + 1
+        ceaser_encrypt(plaintext, k1)
+
     return ciphertext
 
 def ceaser_decrypt(ciphertext, key):
